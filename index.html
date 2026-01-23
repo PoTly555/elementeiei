@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกมทายตารางธาตุ</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #1a1a1a; /* พื้นหลังมืดเพื่อให้ตารางเด่น */
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .input-area {
+            margin-bottom: 30px;
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+        }
+
+        input[type="text"] {
+            padding: 12px 25px;
+            font-size: 1.2rem;
+            width: 350px;
+            border: 2px solid #444;
+            border-radius: 50px;
+            background: #333;
+            color: white;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #3498db;
+        }
+
+/* ปรับขนาดตารางให้รองรับแถวเพิ่ม */
+    .periodic-table {
+        display: grid;
+        grid-template-columns: repeat(18, 55px);
+        grid-template-rows: repeat(10, 60px); /* เพิ่มจำนวนแถวเป็น 10 */
+        gap: 5px;
+        padding: 20px;
+        background: #252525;
+        border-radius: 12px;
+        margin-top: 20px;
+    }
+
+    /* เว้นที่ว่างสำหรับกลุ่ม Lanthanide/Actinide ให้ดูเหมือนตารางจริง */
+    .element-box[style*="grid-row: 9"] {
+        margin-top: 30px; /* เว้นระยะห่างจากตารางหลัก */
+    }
+
+        /* กล่องธาตุตอนที่ยังทายไม่ถูก */
+        .element-box {
+            background-color: #3d3d3d; /* สีเทาเข้มเพื่อให้เห็นเป็นโครงตาราง */
+            border: 1px solid #555;
+            border-radius: 3px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* เลขอะตอมที่มุมซ้ายบน (ให้เห็นตลอด) */
+        .atom-num {
+            position: absolute;
+            top: 3px;
+            left: 5px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #aaa; /* สีเทาอ่อน */
+        }
+
+        /* ข้อมูลที่ถูกซ่อนไว้ */
+        .hidden-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            visibility: hidden; /* ซ่อนเนื้อหาไว้ */
+            opacity: 0;
+            transform: translateY(5px);
+            transition: all 0.4s ease;
+        }
+
+        .symbol {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .name {
+            font-size: 8px;
+            color: #ddd;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        /* --- เมื่อทายถูก --- */
+        .element-box.solved {
+            background-color: #2980b9; /* สีฟ้าสดใสเมื่อทายถูก */
+            border-color: #3498db;
+            box-shadow: 0 0 15px rgba(52, 152, 219, 0.5);
+            z-index: 10;
+        }
+
+        .element-box.solved .hidden-content {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .element-box.solved .atom-num {
+            color: #fff;
+        }
+
+        .score-text {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Periodic Table Master</h1>
+    
+    <div class="score-text">
+        Score: <span id="score" style="color: #3498db;">0</span> / <span id="total">0</span>
+    </div>
+
+    <div class="input-area">
+        <input type="text" id="guessInput" placeholder="Type element name..." autofocus autocomplete="off">
+    </div>
+
+    <div class="periodic-table" id="table-container">
+        {% for e in elements %}
+        <div class="element-box" 
+             id="el-{{ e.number }}"
+             style="grid-column: {{ e.col }}; grid-row: {{ e.row }};">
+            
+            <span class="atom-num">{{ e.number }}</span>
+            
+            <div class="hidden-content">
+                <span class="symbol">{{ e.symbol }}</span>
+                <span class="name">{{ e.name }}</span>
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        const elements = {{ elements | tojson }};
+        const input = document.getElementById('guessInput');
+        const scoreDisplay = document.getElementById('score');
+        const totalDisplay = document.getElementById('total');
+        
+        totalDisplay.innerText = elements.length;
+        let score = 0;
+        let solvedList = new Set();
+
+        input.addEventListener('input', function() {
+            const userInput = this.value.trim().toLowerCase();
+
+            elements.forEach(el => {
+                // เช็คว่าชื่อตรงกันและยังไม่เคยทายถูก
+                if (userInput === el.name.toLowerCase() && !solvedList.has(el.number)) {
+                    const box = document.getElementById(`el-${el.number}`);
+                    box.classList.add('solved');
+                    
+                    solvedList.add(el.number);
+                    score++;
+                    scoreDisplay.innerText = score;
+                    
+                    // เคลียร์ช่อง input
+                    this.value = '';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
