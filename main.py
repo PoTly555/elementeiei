@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
@@ -134,8 +134,18 @@ elements_data = [
 ]
 
 @app.route('/')
-def index():
-    return render_template('index.html', elements=elements_data)
+def home():
+    last_score = request.args.get('score', default=None, type=int)
+    return render_template('home.html', last_score=last_score)
+
+@app.route('/challengepage')
+def challengepage():
+    return render_template('challenge.html')
+
+@app.route('/play')
+def play():
+    time_limit = request.args.get('time', default=0, type=int)
+    return render_template('index.html', elements=elements_data, time_limit=time_limit)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
