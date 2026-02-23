@@ -5,17 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เกมทายตารางธาตุ</title>
     <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #1a1a1a;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            margin: 0;
-            min-height: 100vh;
+body {
+            font-family: 'Segoe UI', sans-serif; background-color: #1a1a1a; color: white;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; margin: 0; text-align: center;
         }
+        <a id="back-btn">⬅️ Back</a>
+    <div id="fog-overlay">
+h1 { font-size: 4rem; margin-bottom: 10px; text-shadow: 0 0 20px rgba(52, 152, 219, 0.6); }
+p { font-size: 1.5rem; color: #aaa; margin-bottom: 30px; }
 
         /* --- เอฟเฟกต์หมอก และ หน้าจอ Click to play --- */
         #fog-overlay {
@@ -182,6 +180,22 @@
         .element-box.solved .atom-num {
             color: #fff;
         }
+        #back-btn:hover {
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+        #back-btn {
+            position: fixed;
+            top: 25px;
+            left: 30px;
+            font-size: 1.2rem;
+            color: #aaa;
+            text-decoration: none;
+            font-weight: bold;
+            z-index: 10000; /* ตั้งค่าเยอะๆ ให้อยู่เหนือหมอก */
+            transition: color 0.3s, text-shadow 0.3s;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -220,43 +234,68 @@
         {% endfor %}
     </div>
 
-    <script>
+<script>
         const elements = {{ elements | tojson }};
+        
+        // รับค่าเวลาที่ตั้งไว้จาก Python (หน่วยเป็นนาที)
+        const timeLimitMinutes = {{ time_limit }}; 
+        const isChallengeMode = timeLimitMinutes > 0;
+        
         const input = document.getElementById('guessInput');
         const scoreDisplay = document.getElementById('score');
         const totalDisplay = document.getElementById('total');
-        
-        // ตัวแปรสำหรับระบบหมอกและเวลา
         const fogOverlay = document.getElementById('fog-overlay');
         const timerDisplay = document.getElementById('timer-display');
+        
         let timerInterval;
-        let secondsElapsed = 0;
+        let secondsElapsed = 0; 
+        let secondsRemaining = timeLimitMinutes * 60; // แปลงนาทีเป็นวินาทีสำหรับโหมด Challenge
         
         totalDisplay.innerText = elements.length;
         let score = 0;
         let solvedList = new Set();
 
-        // --- ระบบเริ่มเกมเมื่อคลิก ---
+        // โชว์เวลาเริ่มต้นให้ตรงกับโหมด
+        if (isChallengeMode) {
+            let m = Math.floor(secondsRemaining / 60).toString().padStart(2, '0');
+            timerDisplay.innerText = `⏱️ ${m}:00`;
+            timerDisplay.style.color = "#e74c3c"; // เปลี่ยนสีนาฬิกาเป็นสีแดงให้ดูตื่นเต้น
+        }
+
         fogOverlay.addEventListener('click', () => {
-            // 1. ซ่อนหมอก (Fade out)
             fogOverlay.style.opacity = '0';
             fogOverlay.style.visibility = 'hidden';
-            
-            // 2. ปลดล็อคช่องพิมพ์และให้เคอร์เซอร์ไปโฟกัสรอเลย
             input.disabled = false;
             input.focus();
 
-            // 3. เริ่มจับเวลา (อัปเดตทุกๆ 1 วินาที)
             timerInterval = setInterval(() => {
-                secondsElapsed++;
-                // แปลงวินาทีให้เป็นรูปแบบ นาที:วินาที (เช่น 01:05)
-                let m = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
-                let s = (secondsElapsed % 60).toString().padStart(2, '0');
-                timerDisplay.innerText = `⏱️ ${m}:${s}`;
+                if (isChallengeMode) {
+                    // โหมด Challenge: นับถอยหลัง
+                    secondsRemaining--;
+                    let m = Math.floor(secondsRemaining / 60).toString().padStart(2, '0');
+                    let s = (secondsRemaining % 60).toString().padStart(2, '0');
+                    timerDisplay.innerText = `⏱️ ${m}:${s}`;
+                    
+                    // เมื่อเวลาหมด
+                    if (secondsRemaining <= 0) {
+                        clearInterval(timerInterval);
+                        input.disabled = true; // ล็อคไม่ให้พิมพ์ต่อ
+                        setTimeout(() => {
+                            alert(`หมดเวลา! ⏰\nคุณทายไปได้ทั้งหมด ${score} / 118 ธาตุ`);
+                            window.location.href = "/"; // เด้งกลับหน้าแรก
+                        }, 100);
+                    }
+                } else {
+                    // โหมด Normal: นับเดินหน้า (เหมือนเดิม)
+                    secondsElapsed++;
+                    let m = Math.floor(secondsElapsed / 60).toString().padStart(2, '0');
+                    let s = (secondsElapsed % 60).toString().padStart(2, '0');
+                    timerDisplay.innerText = `⏱️ ${m}:${s}`;
+                }
             }, 1000);
         });
 
-        // --- ระบบทายชื่อธาตุ ---
+        // --- ระบบทายชื่อธาตุ (เหมือนเดิม) ---
         input.addEventListener('input', function() {
             const userInput = this.value.trim().toLowerCase();
 
@@ -264,23 +303,33 @@
                 if (userInput === el.name.toLowerCase() && !solvedList.has(el.number)) {
                     const box = document.getElementById(`el-${el.number}`);
                     box.classList.add('solved');
-                    
                     solvedList.add(el.number);
                     score++;
                     scoreDisplay.innerText = score;
-                    
-                    this.value = ''; // เคลียร์ช่อง input
+                    this.value = ''; 
 
-                    // เช็คว่าชนะเกมหรือยัง
                     if (score === elements.length) {
-                        clearInterval(timerInterval); // หยุดเวลาเมื่อทายครบ
+                        clearInterval(timerInterval);
                         setTimeout(() => {
-                            alert(`ยินดีด้วย! คุณทายครบทั้งหมดในเวลา ${timerDisplay.innerText.replace('⏱️ ', '')} นาที`);
+                            alert(isChallengeMode 
+                                ? "สุดยอด! คุณเคลียร์ตารางธาตุได้ก่อนหมดเวลา! 🎉" 
+                                : `ยินดีด้วย! คุณทายครบทั้งหมดในเวลา ${timerDisplay.innerText.replace('⏱️ ', '')} นาที`);
                         }, 500);
                     }
                 }
             });
         });
+        // --- ระบบปุ่ม Back ---
+        const backBtn = document.getElementById('back-btn');
+        backBtn.addEventListener('click', () => {
+            // หยุดเวลา
+            clearInterval(timerInterval); 
+            // เด้งแจ้งเตือนสรุปผล
+            alert(`สรุปผลงานก่อนออก:\nคุณทายไปได้ทั้งหมด ${score} / 118 ธาตุ!`);
+            // พากลับหน้าแรก พร้อมแนบคะแนนไปด้วย
+            window.location.href = `/?score=${score}`;
+        });
     </script>
+    </style>
 </body>
 </html>
