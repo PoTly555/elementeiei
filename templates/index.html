@@ -5,6 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เกมทายตารางธาตุ</title>
     <style>
+        /* --- ปุ่ม Back มุมซ้ายบน --- */
+        #back-btn {
+            position: fixed;
+            top: 25px;       /* ห่างจากขอบบน */
+            left: 30px;      /* ห่างจากขอบซ้าย */
+            font-size: 1.2rem;
+            color: #aaa;
+            text-decoration: none;
+            font-weight: bold;
+            z-index: 10000;  /* ตั้งค่าสูงๆ ให้ลอยอยู่เหนือหมอก */
+            cursor: pointer;
+            transition: color 0.3s, text-shadow 0.3s;
+        }
+        #back-btn:hover {
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
 body {
             font-family: 'Segoe UI', sans-serif; background-color: #1a1a1a; color: white;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -199,7 +216,7 @@ p { font-size: 1.5rem; color: #aaa; margin-bottom: 30px; }
     </style>
 </head>
 <body>
-
+    <a id="back-btn">⬅️ Back</a>
     <div id="fog-overlay">
         <div class="click-text">Click to play</div>
     </div>
@@ -235,6 +252,14 @@ p { font-size: 1.5rem; color: #aaa; margin-bottom: 30px; }
     </div>
 
 <script>
+    document.getElementById('back-btn').addEventListener('click', () => {
+            // หยุดเวลา
+            clearInterval(timerInterval); 
+            // เด้งแจ้งเตือนสรุปผลคะแนน
+            alert(`สรุปผลงานก่อนออก:\nคุณทายไปได้ทั้งหมด ${score} / 118 ธาตุ!`);
+            // พากลับหน้าแรก พร้อมส่งคะแนนไปโชว์ด้วย
+            window.location.href = `/?score=${score}`;
+        });
         const elements = {{ elements | tojson }};
         
         // รับค่าเวลาที่ตั้งไว้จาก Python (หน่วยเป็นนาที)
