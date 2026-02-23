@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เลือกเวลา - Challenge Mode</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif; background-color: #1a1a1a; color: white;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; margin: 0; text-align: center;
+        }
+        h1 { font-size: 3rem; margin-bottom: 30px; color: #e74c3c; }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .time-btn {
+            padding: 20px; font-size: 1.5rem; font-weight: bold; color: white;
+            background-color: #333; border: 2px solid #e74c3c; border-radius: 15px;
+            text-decoration: none; transition: all 0.3s ease;
+        }
+        .time-btn:hover { background-color: #e74c3c; transform: scale(1.05); }
+        .back-btn { color: #aaa; text-decoration: none; font-size: 1.2rem; transition: color 0.3s; }
+        .back-btn:hover { color: white; }
+    </style>
+</head>
+<body>
+    <h1>Select Time Limit</h1>
+    
+    <div class="grid-container">
+        <a href="/play?time=1" class="time-btn">1 นาที</a>
+        <a href="/play?time=2" class="time-btn">2 นาที</a>
+        <a href="/play?time=3" class="time-btn">3 นาที</a>
+        <a href="/play?time=4" class="time-btn">4 นาที</a>
+        <a href="/play?time=5" class="time-btn">5 นาที</a>
+        <a href="/play?time=10" class="time-btn">10 นาที</a>
+    </div>
+
+    <a href="/" class="back-btn">⬅️ กลับหน้าแรก</a>
+</body>
+</html>

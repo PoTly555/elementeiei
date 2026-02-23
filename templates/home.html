@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>หน้าแรก - Periodic Table Master</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #1a1a1a;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(52, 152, 219, 0.6);
+        }
+        p { font-size: 1.5rem; color: #aaa; margin-bottom: 50px; }
+        
+        .btn-container { display: flex; gap: 20px; } /* จัดปุ่มให้อยู่แนวนอน */
+        
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .play-btn {
+            background-color: #3498db;
+            box-shadow: 0 0 15px rgba(52, 152, 219, 0.4);
+        }
+        .play-btn:hover { background-color: #2980b9; transform: scale(1.05); }
+        
+        .challenge-btn {
+            background-color: #e74c3c;
+            box-shadow: 0 0 15px rgba(231, 76, 60, 0.4);
+        }
+        .challenge-btn:hover { background-color: #c0392b; transform: scale(1.05); }
+    </style>
+</head>
+<body>
+    <h1>Periodic Table Master</h1>
+    <p>ท้าทายความจำ ทายชื่อธาตุให้ครบ 118 ตัว!</p>
+    
+    <div class="btn-container">
+        <a href="/play" class="btn play-btn">NORMAL PLAY</a>
+        <a href="/challengepage" class="btn challenge-btn">CHALLENGE</a>
+    </div>
+</body>
+</html>
